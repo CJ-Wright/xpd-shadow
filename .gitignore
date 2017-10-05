@@ -61,7 +61,5 @@ target/
 # charm
 .idea/
 
-<<<<<<< HEAD
-
 # MacOS
 .DS_Store
