@@ -39,7 +39,7 @@ def db():
     yield db
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def bt(home_dir, db):
     # start a beamtime
     PI_name = 'Billinge '
@@ -59,20 +59,20 @@ def bt(home_dir, db):
 
     # set simulation objects
     # alias
-    #pe1c = xpd_pe1c 
-    pe1c = simple_pe1c
+    pe1c = xpd_pe1c
+    # pe1c = simple_pe1c
     configure_device(db=db, shutter=shctl1,
                      area_det=pe1c, temp_controller=cs700)
     yield bt
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def glbl(bt):
     from xpdacq.glbl import glbl
     yield glbl
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def fresh_xrun(bt):
     # create xrun
     xrun = CustomizedRunEngine(None)
@@ -92,7 +92,7 @@ def exp_hash_uid(bt, fresh_xrun, glbl):
     yield exp_hash_uid
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def home_dir():
     stem = glbl_dict['home']
     config_dir = glbl_dict['xpdconfig']

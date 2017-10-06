@@ -42,12 +42,10 @@ def test_acq_basic(fresh_xrun, bt, db):
                ScanPlan(bt, Tlist, 2, [305, 300, 295])
                ]:
         xrun(0, sp)
-    img = next(db[-1].data('pe1_image', fill=True))
-    print(img.shape)
-    AAA
 
 
 def test_acq_basic_pipeline(fresh_xrun, bt, db, glbl):
+    """No cal no I(Q) I(tth) G(r) or Mask"""
     xrun = fresh_xrun
     s = conf_main_pipeline(db, glbl['tiff_base'],
                            calibration_md_folder=glbl['config_base'],
@@ -90,17 +88,23 @@ def test_acq_basic_pipeline_cal(fresh_xrun, bt, db, glbl, cal_yaml):
     xrun.beamtime = bt
     xrun.subscribe(istar(s.emit))
     xrun.subscribe(istar(pprint))
+    file_sets = {k: set() for k in ['.tiff', '.msk', '.iq', '.gr']}
     tiff_files = set()
-    for sp, ntiff in zip([0,
-                          ScanPlan(bt, tseries, 2, 1, 5),
-                          ScanPlan(bt, Tramp, 2, 295, 305, 2),
-                          ScanPlan(bt, Tlist, 2, [305, 300, 295])
-                          ], [1, 5, 6, 3]):
-        xrun(0, sp)
-        new_tiffs = []
-        for root, dir, files in os.walk(glbl['tiff_base']):
-            new_tiffs.extend([f for f in files if f.endswith('.tiff')])
-        new_tiffs = set(new_tiffs)
-        assert len(new_tiffs - tiff_files) == ntiff
-        for e in new_tiffs:
-            tiff_files.add(e)
+    for sp, nfiles in zip([0,
+                           ScanPlan(bt, tseries, 2, 1, 5),
+                           ScanPlan(bt, Tramp, 2, 295, 305, 2),
+                           ScanPlan(bt, Tlist, 2, [305, 300, 295])
+                           ], [1, 5, 6, 3]):
+        xrun(1, sp)
+        for ext, s in file_sets.items():
+            new = []
+            for root, dir, files in os.walk(glbl['tiff_base']):
+                print(files)
+                new.extend([f for f in files if f.endswith(ext)])
+            new = set(new)
+            if ext == '.iq':
+                assert len(new - s) == nfiles * 2  # tth and q
+            else:
+                assert len(new - s) == nfiles
+            for e in new:
+                tiff_files.add(e)
