@@ -49,7 +49,6 @@ install:
   - pip install https://github.com/NSLS-II/event-model/zipball/master#egg=event_model
   - pip install https://github.com/NSLS-II/databroker/zipball/master#egg=databroker
   - pip install https://github.com/NSLS-II/bluesky/zipball/master#egg=bluesky
-  - cp xpdan/config/xpdan.yml /home/travis/.config/xpdan.yml
   - pip install https://github.com/mrocklin/streamz/zipball/master#egg=streamz
   - pip install https://github.com/xpdAcq/SHED/zipball/master#egg=shed
   - pip install https://github.com/xpdAcq/xpdView/zipball/master#egg=xpdview
