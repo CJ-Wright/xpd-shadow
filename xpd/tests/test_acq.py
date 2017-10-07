@@ -82,29 +82,33 @@ def test_acq_basic_pipeline_cal(fresh_xrun, bt, db, glbl, cal_yaml):
                            calibration_md_folder=glbl['config_base'],
                            write_to_disk=True,
                            vis=False,
-                           verbose=True)
+                           verbose=True,
+                           mask_setting=None)
     # import import
     _import_sample_info(saf_num=300000, bt=bt)
     xrun.beamtime = bt
     xrun.subscribe(istar(s.emit))
     xrun.subscribe(istar(pprint))
-    file_sets = {k: set() for k in ['.tiff', '.msk', '.iq', '.gr']}
-    tiff_files = set()
-    for sp, nfiles in zip([0,
-                           ScanPlan(bt, tseries, 2, 1, 5),
-                           ScanPlan(bt, Tramp, 2, 295, 305, 2),
-                           ScanPlan(bt, Tlist, 2, [305, 300, 295])
-                           ], [1, 5, 6, 3]):
+    nf = 0
+    for i, (sp, nfiles) in enumerate(zip([
+        0,
+        ScanPlan(bt, tseries, 2, 1, 5),
+        ScanPlan(bt, Tramp, 2, 295, 305, 2),
+        ScanPlan(bt, Tlist, 2, [305, 300, 295])
+    ], [
+        1,
+        5,
+        6,
+        3
+    ])):
+        nf += nfiles  # The files accumulate as does our count of them
         xrun(1, sp)
-        for ext, s in file_sets.items():
-            new = []
-            for root, dir, files in os.walk(glbl['tiff_base']):
-                print(files)
-                new.extend([f for f in files if f.endswith(ext)])
-            new = set(new)
-            if ext == '.iq':
-                assert len(new - s) == nfiles * 2  # tth and q
+        for sub_folder in ['dark_sub', 'mask', 'iq_q',
+                           'iq_tth', 'pdf']:
+            files = os.listdir(os.path.join(glbl['tiff_base'],
+                                            'Ni', sub_folder))
+            print(files)
+            if sub_folder == 'mask':  # we only produce a single mask per run
+                assert len(files) == i + 1
             else:
-                assert len(new - s) == nfiles
-            for e in new:
-                tiff_files.add(e)
+                assert len(files) == nf
