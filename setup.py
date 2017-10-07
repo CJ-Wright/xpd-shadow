@@ -2,12 +2,11 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name='xpdan',
+    name='xpd-shadow',
     version='0.0.0',
     packages=find_packages(),
-    description='data processing module',
+    description='integration tests for xpd',
     zip_safe=False,
-    package_data={'xpdan': ['config/*']},
     include_package_data=True,
-    url='http:/github.com/xpdAcq/xpdAn'
+    url='http:/github.com/xpdAcq/xpd-shadow'
 )
